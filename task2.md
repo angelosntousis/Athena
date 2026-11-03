@@ -99,12 +99,15 @@ We do not add other corpora (such as AG News or Wikipedia): they would add text 
 
 ## Text cleaning and pre-tokenisation
 
-Tokenisers A and B share the same cleaning and pre-splitting, so the only difference between them is whole words vs pieces. The same cleaning is applied to every review in every split.
+Tokenisers A and B share the same cleaning and pre-splitting, so the only difference between them is whole words vs pieces. All these steps are built into the tokenisers themselves, so every review in every split goes through exactly the same cleaning.
 
 1. **Remove HTML line breaks.** About 59% of `train` reviews contain `<br />` tags, which are leftover web formatting. We replace them with a space.
-2. **Normalise and lowercase.** Unicode normalisation (NFKC), curly apostrophes (’) turned into straight ones ('), then lowercasing. *Good* and *good* should be one feature: case rarely changes sentiment, and merging case variants frees vocabulary slots for other words.
-3. **Pre-split into words and punctuation.** Punctuation becomes its own token (`mess.` → `mess` `.`), so *mess* is one feature wherever it appears.
-4. **Split clitics.** `didn't` → `did` `n't`, `kubrick's` → `kubrick` `'s` (the standard Penn Treebank convention). This gives every negation, from *didn't* and *isn't* to *wasn't*, one shared `n't` token: a strong, frequent sentiment signal for our bag-of-words models.
+2. **Repair broken characters.** Some reviews were saved with an old Windows encoding, so their dashes and ellipses became invisible control characters (about 9,300 occurrences across the 100,000 reviews). We turn them back into `-` and `...`. Curly (’) and acute (´) apostrophes become straight ones ('), so *didn´t* is split like *didn't* and keeps its `n't`.
+3. **Normalise and lowercase.** Unicode normalisation (NFKC), then lowercasing. *Good* and *good* should be one feature: case rarely changes sentiment, and merging case variants frees vocabulary slots for other words.
+4. **Pre-split into words and punctuation.** Punctuation becomes its own token (`mess.` → `mess` `.`), so *mess* is one feature wherever it appears.
+5. **Split clitics.** `didn't` → `did` `n't`, `kubrick's` → `kubrick` `'s` (the standard Penn Treebank convention). This gives every negation, from *didn't* and *isn't* to *wasn't*, one shared `n't` token: a strong, frequent sentiment signal for our bag-of-words models.
+
+We also scanned all 100,000 reviews for other noise. Other HTML tags (18 reviews), HTML entities such as `&#8217;` (22 reviews) and web links (386 reviews) together affect under 0.5% of reviews, so we leave them as they are.
 
 Two deliberate changes from the tutorial: it pre-splits on spaces only (punctuation stays attached), and it does not lowercase.
 
@@ -125,7 +128,7 @@ The vocabulary size is the number of distinct tokens a tokeniser knows. It is al
 
 Why these four values:
 
-- **They span the whole useful range.** At 8,000, A loses 6% of all tokens; at 64,000 it keeps nearly every word. Only 63,737 distinct words appear at least twice in the unlabelled reviews, so 64,000 is roughly "every repeated word" and larger sizes add nothing for A.
+- **They span the whole useful range.** At 8,000, A loses 6% of all tokens; at 64,000 it keeps nearly every word. Only 63,725 distinct words appear at least twice in the unlabelled reviews, so 64,000 is roughly "every repeated word" and larger sizes add nothing for A.
 - **Each candidate doubles the previous one,** so we see the trend without testing every value in between.
 - The tutorial's 1,000 is left out on purpose: at that size most words are split into fragments (see the previous section).
 
