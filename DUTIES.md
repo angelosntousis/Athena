@@ -2,7 +2,7 @@
 
 This Markdown file records what everybody does, what we agree to compare, and what we need to finish. Our three committers are **Angelos, Giovanni, and Stephen**.
 
-Our chosen dataset and task are **Sentiment Classification — SST-2**: [stanfordnlp/sst2 on Hugging Face](https://huggingface.co/datasets/stanfordnlp/sst2).
+Our chosen dataset and task are **Sentiment Classification — IMDb**: [mteb/imdb on Hugging Face](https://huggingface.co/datasets/mteb/imdb).
 
 Our aim is work worthy of a **10/10**: complete the assignment, run fair and reproducible experiments, explain our decisions, and analyse what we learn. This plan is a quality target; the course assessors determine the grade.
 
@@ -10,7 +10,7 @@ Our aim is work worthy of a **10/10**: complete the assignment, run fair and rep
 
 | Person | Main responsibility | Concrete deliverables |
 | --- | --- | --- |
-| **Stephen** | **1. Dataset selection and understanding.** Explain why SST-2 fits the task. Inspect examples and compute statistics, including instances of each classification label. | A data summary, label counts and proportions, text-length plots, representative examples, duplicate/related-text audit, and documented split policy. |
+| **Stephen** | **1. Dataset selection and understanding.** Explain why IMDb fits the task. Inspect examples and compute statistics, including instances of each classification label. | A data summary, label counts and proportions, text-length plots, representative examples, duplicate/related-text audit, and documented split policy. |
 | **Giovanni** | **2. Text segmentation and tokenisation.** Start from the tutorial's BPE tokeniser. Decide whether to train a new one, which hyperparameters to use, and which text it may learn from. Assess whether the available training corpus is sufficient; justify any larger resource of similar nature. | A reproducible tokenisation pipeline, saved tokeniser settings, segmentation examples, vocabulary/unknown-token statistics, and a justified training-data choice. |
 | **Angelos** | **3. Feature representations.** Start with token occurrences and frequencies from the tutorial, then implement and motivate an additional representation. | Token indicators, bag-of-words counts, and TF-IDF encoders; a short explanation of their differences and small examples showing the resulting vectors. |
 
@@ -63,21 +63,25 @@ For the main matrix, keep BPE settings fixed after a training-only pilot. Start 
 
 ### Dataset facts and audit
 
-The [SST-2 dataset card](https://huggingface.co/datasets/stanfordnlp/sst2) lists **67,349 training**, **872 validation**, and **1,821 test** examples. Labels are **0 = negative** and **1 = positive**; public test labels are hidden and represented by `-1`. The source treebank includes sentence and phrase annotations.
+We use **`mteb/imdb`**, the MTEB version of the English movie-review sentiment dataset. Its [current split metadata](https://huggingface.co/datasets/mteb/imdb/raw/main/README.md) lists **24,904 training reviews** and **24,678 test reviews**, with no predefined validation split. The fields are **`text`**, **`label`**, and **`label_text`**. The binary target is **0 = negative**, **1 = positive**; test labels are available.
 
-Stephen must verify the loaded version, fields (`sentence`, `label`, `idx`), counts, label proportions, empty texts, duplicates, conflicting labels, and length distributions. Record the dataset revision. Do not treat `idx` as a parent-review or sentence-group identifier.
+Stephen must verify the loaded revision, actual split sizes, label mapping and proportions, empty texts, duplicates, conflicting labels, and review-length distributions. Save the dataset revision and split-local row indices or text hashes for reproducibility. Use **`text` as input** and **`label` as target**; `label_text` is a readable copy of the target and must never be included as an input feature.
 
-Audit related phrases as well as exact duplicates: related fragments from one source sentence can make random row-level CV optimistic. Keep exact duplicates together; if reliable parent-sentence groups can be recovered, keep those together too. Record any exclusions and split overlap checks. If reliable groups are unavailable, explain that ordinary stratification does not remove this dependence and discuss the limitation with the TA before finalising the protocol.
+Use this repository's actual counts rather than assuming the commonly quoted 25,000/25,000 counts: the card's descriptive-statistics section contains counts that differ from its split metadata. Recompute class counts rather than assuming the selected version is perfectly balanced.
+
+Audit duplicate and near-duplicate reviews within training and check train/test text overlap under a predefined policy, without inspecting test labels to make modelling decisions. Keep exact training duplicates in the same fold, or remove them consistently before splitting; record exclusions and any residual dependence. If reliable source/movie groups become available, consider group-based evaluation as an additional question. The provided three fields do not contain movie IDs, so do not invent groups from row order.
+
+Reviews can contain HTML line breaks such as `<br />`. Agree on whether to replace these with spaces, document that policy, and apply it identically before tokeniser training and all feature transformations. Inspect long reviews and preserve negation. Do not silently truncate inputs: these feature encoders can count tokens across a full review.
 
 ### Splits and fair comparison
 
-1. Use the official **training split for development and cross-validation**. Reserve the labelled official **validation split as our final held-out evaluation** and leave it untouched during design, tuning, and error analysis. Its official name remains “validation”; describe our use of it clearly.
+1. Use the dataset's **training split for development and cross-validation**. Reserve its labelled **test split for final held-out evaluation**, excluding it from design, tuning, and error analysis. Create any validation/early-stopping subsets only from the current training fold. Limit any prior test access to the predefined text-overlap audit, without using its labels or model scores.
 2. Use **5-fold stratified cross-validation**, repeated with split seeds **0, 3, and 5**, shared across every system. If grouping is possible, use stratified group folds and record any imbalance. Save the exact row IDs for every split.
 3. Tune hyperparameters **inside each outer training fold**, using a small, predeclared 3-fold inner CV search. Use the same candidate-budget limit for each architecture. All learned preprocessing must also be fitted inside the inner training folds. Keep early-stopping data separate from the inner scoring fold.
 4. After choosing hyperparameters, refit within the outer training data and score the outer fold once. For neural models, derive an epoch budget from inner training or use a separate early-stopping subset of outer training; never choose epochs on the outer evaluation fold.
 5. **Accuracy is the primary metric**, subject to justification from the observed class balance and task. Also report macro-F1 and per-class precision/recall. Save out-of-fold predictions and confusion matrices. Record training time, inference time, and model size with comparable hardware and batch settings.
 6. Set and log Python, NumPy, and PyTorch seeds. Record split seeds and model seeds separately. Use a fixed, shared model-seed policy for the main comparison, and test additional initialisation seeds for shortlisted neural systems if resources permit. Do not treat repeated predictions for the same examples as independent observations.
-7. Select the final configuration from CV evidence, refit on the official training split, then run the reserved labelled validation set **once**. Report this as a separate held-out check. Do not claim local accuracy on the unlabelled public test split.
+7. Select the final configuration from CV evidence, refit on the dataset's training split, then evaluate the reserved labelled **test split once**. Report this separately from CV. Do not use the final test result to select a different model or tune settings.
 
 Pilot one fold first to estimate runtime and memory. Start with at most **four candidate hyperparameter configurations per architecture and representation**. If nested evaluation is too expensive, reduce and freeze the search budget before examining outer results; do not silently turn evaluation folds into tuning data.
 
@@ -92,12 +96,12 @@ Pilot one fold first to estimate runtime and memory. Start with at most **four c
 
 ## 6. Extensions that strengthen the work
 
-Finish the required comparisons before adding extensions. Our central question is: **For SST-2, do richer text features help more reliably than changing the classifier architecture?**
+Finish the required comparisons before adding extensions. Our central question is: **For IMDb, do richer text features help more reliably than changing the classifier architecture?**
 
 Prioritise these two extensions:
 
 1. **Feature ablation:** compare TF-IDF unigrams against TF-IDF unigrams + bigrams under a fixed architecture and evaluation protocol. Hypothesis: short combinations can capture sentiment cues such as negation better than isolated tokens. State whether the units are words or BPE tokens; use an unchanged tokeniser for the controlled comparison.
-2. **Structured error analysis:** inspect about **30–50 training out-of-fold errors**, selected reproducibly and covering both labels. Categorise negation, contrast (“but”), mixed sentiment, short fragments, and other observed patterns. Compare cases fixed or broken by the feature and architecture changes. Show representative examples without generalising from a few anecdotes.
+2. **Structured error analysis:** inspect about **30–50 training out-of-fold errors**, selected reproducibly and covering both labels. Categorise negation, contrast (“but”), mixed sentiment, sarcasm, long reviews, and other observed patterns. Examine whether errors vary with review length. Compare cases fixed or broken by the feature and architecture changes. Show representative examples without generalising from a few anecdotes.
 
 If time remains, choose **one** further question: BPE vocabulary size (for example 1k/5k/10k), word-level versus BPE tokenisation, a learning curve, or a computational-budget comparison of the chosen architectures. Tune these choices inside training data and evaluate on the same outer folds. External tokeniser-training text needs a source, domain rationale, and overlap audit; it is optional, not automatically necessary.
 
@@ -122,10 +126,12 @@ These extensions should produce explanations, not just a larger score table. A w
 - Keep commits focused and reviewable. Each teammate checks another person's code and can explain their own changes. Never invent, selectively omit, or manually improve results.
 - Maintain a decision log: **question → hypothesis → controlled experiment → result → uncertainty → conclusion**. Save sources and reusable figures for the eventual blog.
 - Maintain an AI-assistance log with date, tool, delegated task, affected files, and human verification. **Initial entry, 2026-11-03:** Codex assisted with environment setup and drafting `DUTIES.md` from the assignment and tutorial; the team must review the plan. No classifier experiments or results were produced as part of writing this plan. Add later assistance as it occurs.
+- **Feature implementation entry, 2026-11-03:** Codex helped implement token indicators, bag-of-words counts, and TF-IDF in `part1/features.py`, and created `part1/features_walkthrough.ipynb` with synthetic examples and correctness checks. Angelos must review and explain the code. This step does not produce dataset performance results.
+- **Dataset change entry, 2026-11-03:** The team selected `mteb/imdb`. Codex updated this plan and the feature walkthrough to use review text, the selected dataset schema, and a final held-out test split. The feature encoder algorithms remain dataset-independent; no IMDb classifier results have been produced.
 
 ## 9. Final quality checklist
 
-- [ ] We understand SST-2, its labels, source domain, split roles, and dependence/leakage limitations.
+- [ ] We understand IMDb, its labels, source domain, split roles, and dependence/leakage limitations.
 - [ ] We compare indicators, bag-of-words, and TF-IDF across log-linear, shallow MLP, and our additional architecture.
 - [ ] We use shared cross-validation folds, training-only preprocessing/tuning, and a justified metric.
 - [ ] We provide Bayesian estimation, a motivated ROPE, and honest uncertainty statements.
@@ -141,4 +147,5 @@ These extensions should produce explanations, not just a larger score table. A w
 - [Project 1 assignment and checklist](part1/project.ipynb).
 - [Tutorial and its questions](part1/tutorial.ipynb), plus the accompanying `part1` Python modules.
 - [Repository setup instructions](README.md).
-- [SST-2 dataset card, split sizes, labels, and original-paper citation](https://huggingface.co/datasets/stanfordnlp/sst2).
+- [IMDb dataset card, label examples, and original-paper citation](https://huggingface.co/datasets/mteb/imdb).
+- [MTEB IMDb split metadata and schema](https://huggingface.co/datasets/mteb/imdb/raw/main/README.md).
