@@ -3,7 +3,10 @@
 Representations:
 - TokenIndicator: binary presence (0 or 1).
 - BagOfWords: raw occurrence counts.
+- NormalisedBagOfWords: occurrence counts divided by the review's L1 or L2 norm.
 - TfidfEncoder: TF-IDF weighting with L2 normalisation.
+- NaiveBayesWeighting: any of the above, with features weighted by their Naive Bayes log-count ratio
+  (learned from the training labels).
 
 ngram_range: (1, 1) = unigrams, (2, 2) = bigrams, (1, 2) = both.
 With BPE, tokens may be word pieces rather than complete words.
@@ -33,6 +36,7 @@ from collections import Counter
 import numpy as np
 from scipy.sparse import csr_matrix, hstack
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.preprocessing import normalize
 from sklearn.utils.validation import check_is_fitted
 from tokenizers import Tokenizer
 
@@ -133,6 +137,25 @@ class TokenIndicator(BagOfWords):
         return counts
 
 
+class NormalisedBagOfWords(BagOfWords):
+    """Occurrence counts divided per document by their L1 or L2 norm.
+
+    norm="l1": relative frequencies, summing to 1 in every review.
+    norm="l2": every review vector has length 1, as in TfidfEncoder but without IDF weighting.
+    Long reviews no longer get larger feature values than short ones. Nothing is learned
+    from the training texts beyond what BagOfWords learns, so fit is unchanged.
+    """
+
+    def __init__(self, tokenizer: Tokenizer, ngram_range=(1, 1), min_df=2, norm="l2"):
+        if norm not in ("l1", "l2"):
+            raise ValueError("norm must be 'l1' or 'l2'.")
+        super().__init__(tokenizer, ngram_range=ngram_range, min_df=min_df)
+        self.norm = norm
+
+    def transform(self, texts) -> csr_matrix:
+        return csr_matrix(normalize(super().transform(texts), norm=self.norm))
+
+
 class TfidfEncoder(BagOfWords):
     """Counts times smoothed IDF, followed by per-document L2 normalisation.
 
@@ -166,6 +189,53 @@ class TfidfEncoder(BagOfWords):
         if shape[0] == 0:
             return counts
         return csr_matrix(self.transformer.transform(counts))
+
+
+class NaiveBayesWeighting(Encoder):
+    """Any of the representations above, with every feature multiplied by its Naive Bayes log-count ratio
+    (Wang & Manning, 2012, "Baselines and bigrams: simple, good sentiment and topic classification").
+
+    r(j) = log((alpha + p(j)) / sum_k (alpha + p(k))) - log((alpha + q(j)) / sum_k (alpha + q(k)))
+    where p(j) and q(j) are the numbers of positive (label 1) and negative (label 0) training documents
+    containing feature j. Features typical of one class get large |r|, features common to both get r near 0.
+
+    Unlike IDF, r is learned from the labels: fit must receive only training texts and their labels.
+    renormalise=True rescales every weighted vector to L2 length 1, as TfidfEncoder's vectors are.
+    """
+
+    def __init__(self, encoder: BagOfWords, alpha=1.0, renormalise=True):
+        self.encoder = encoder
+        self.alpha = alpha
+        self.renormalise = renormalise
+        self.r = None
+
+    def __len__(self) -> int:
+        return len(self.encoder)
+
+    def fit(self, training_texts, labels):
+        texts = list(training_texts)
+        labels = np.asarray(labels)
+        if set(np.unique(labels)) - {0, 1}:
+            raise ValueError("Naive Bayes weighting expects binary labels 0 and 1.")
+        present = self.encoder.fit_transform(texts)
+        present.data[:] = 1.0  # documents containing each feature, as in the paper's binarised features
+        p = self.alpha + np.asarray(present[labels == 1].sum(axis=0)).ravel()
+        q = self.alpha + np.asarray(present[labels == 0].sum(axis=0)).ravel()
+        self.r = np.log(p / p.sum()) - np.log(q / q.sum())
+        return self
+
+    def fit_transform(self, training_texts, labels) -> csr_matrix:
+        texts = list(training_texts)
+        return self.fit(texts, labels).transform(texts)
+
+    def transform(self, texts) -> csr_matrix:
+        if self.r is None:
+            raise ValueError("NaiveBayesWeighting must be fitted first.")
+        weighted = csr_matrix(self.encoder.transform(texts).multiply(self.r[np.newaxis, :]))
+        return csr_matrix(normalize(weighted, norm="l2")) if self.renormalise else weighted
+
+    def __call__(self, text: str) -> np.ndarray:
+        return self.transform([text]).toarray()[0]
 
 
 class BigramCounts(Encoder):

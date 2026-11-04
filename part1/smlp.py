@@ -11,20 +11,22 @@ import json
 import numpy as np
 
 class SparseMLP(nn.Module):
-    """One-hidden-layer MLP that accepts sparse input tensors.
+    """MLP with one or more hidden layers that accepts sparse input tensors.
 
     Inputs: feature vectors of size `input_dim` (e.g. bag-of-words).
-    Process: sparse matmul into a dense hidden layer, ReLU + dropout, linear (num_classes) and log-softmax outputs
+    Process: sparse matmul into a dense hidden layer, ReLU + dropout, then hidden_layers - 1 further
+        (linear, ReLU, dropout) layers, linear (num_classes) and log-softmax outputs
         log-softmax, rather than softmax, for numerical stability
     Output: logprobs over `num_classes`.
     """
 
-    def __init__(self, input_dim, hidden_dim, num_classes, dropout=0.2):
+    def __init__(self, input_dim, hidden_dim, num_classes, dropout=0.2, hidden_layers=1):
         """
         input_dim: size of the input feature space (e.g. vocabulary size)
-        hidden_dim: width of the hidden layer
+        hidden_dim: width of every hidden layer
         num_classes: number of output labels
         dropout: fraction of hidden units zeroed during training (regularisation)
+        hidden_layers: number of hidden layers (1 is the tutorial's model)
         """
         super().__init__()
 
@@ -38,6 +40,13 @@ class SparseMLP(nn.Module):
 
         self.activation = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
+
+        # Hidden layers after the first one (none for a one-hidden-layer model, whose parameters stay as before)
+        self.hidden = nn.Sequential(*[
+            module
+            for _ in range(hidden_layers - 1)
+            for module in (nn.Linear(hidden_dim, hidden_dim), nn.ReLU(), nn.Dropout(dropout))
+        ])
 
         # Everything after the first layer is dense.
         self.output = nn.Sequential(
@@ -55,6 +64,7 @@ class SparseMLP(nn.Module):
 
         x = self.activation(x)
         x = self.dropout(x)
+        x = self.hidden(x)
         # logprobs
         return self.output(x)
 
@@ -185,14 +195,26 @@ def evaluate(model, dataloader, criterion, device="cpu"):
         "accuracy": total_correct / total_examples
     }, torch.cat([t.detach().cpu() for t in all_preds]).numpy()
 
+def encode(texts, encoder):
+    """
+    Encodes texts as a sparse matrix (one row per text).
+    Encoders from features.py are applied to the whole batch at once, which avoids building
+    one dense vocabulary-sized vector per text; other encoders (such as clslib.TokenIndicator) text by text.
+    """
+    if hasattr(encoder, "transform"):
+        return csr_matrix(encoder.transform(texts))
+    return csr_matrix([encoder(text) for text in texts])
+
 def train_neural_network_model(training_set, validation_set, num_classes, encoder, save_to,   
                                 hidden_dim=128, dropout=0.1, batch_size=64, learning_rate=1e-3, 
-                                weight_decay=1e-4, num_epochs=20, device=torch.device("cpu")):
+                                weight_decay=1e-4, num_epochs=20, device=torch.device("cpu"),
+                                hidden_layers=1, patience=None):
     """Encode texts, train SparseMLP, and checkpoint the best validation model.
 
     Inputs: train/val (text, label) pairs, num_classes, encoder (text -> sparse vector), path prefix to save weights,
             plus standard training hyperparameters.
     Process: vectorise documents, build sparse dataloaders, train for `num_epochs`, save best-by-val-loss.
+        With `patience`, training stops early once the validation loss has not improved for that many epochs.
     Output: per-epoch metrics list, best epoch index, and validation predictions from the best model.
     """
     if isinstance(device, str):
@@ -201,18 +223,15 @@ def train_neural_network_model(training_set, validation_set, num_classes, encode
     time_start = time.time()
     # Convert the training and validation sets to vectors
     print("Transforming documents...")
-    training_vectors = [encoder(text) for text, label in training_set]
+    X_train_sparse = encode([text for text, label in training_set], encoder)
     training_labels = [int(label) for text, label in training_set]
-    validation_vectors = [encoder(text) for text, label in validation_set]
+    X_val_sparse = encode([text for text, label in validation_set], encoder)
     validation_labels = [int(label) for text, label in validation_set]
 
     time_document_to_vector = time.time()
     print(f"Document transformation done! Time taken: {time_document_to_vector - time_start:.3f} seconds")
     
     # Keep SciPy sparse here; conversion to torch happens in sparse_collate
-    X_train_sparse = csr_matrix(training_vectors)
-    X_val_sparse = csr_matrix(validation_vectors)
-
     train_dataset = SparseDataset(X_train_sparse, training_labels) # create the training dataset
     val_dataset = SparseDataset(X_val_sparse, validation_labels) # create the validation dataset
 
@@ -241,11 +260,13 @@ def train_neural_network_model(training_set, validation_set, num_classes, encode
             'hidden_dim': hidden_dim, 
             'num_classes': num_classes, 
             'dropout': dropout,
+            'hidden_layers': hidden_layers,
         }
         json.dump(args, f, indent=2, ensure_ascii=False)
         
     # Create the model based on the input dimension, chosen hidden dimension, number of classification classes and dropout rate
-    model = SparseMLP(input_dim=len(encoder), hidden_dim=hidden_dim, num_classes=num_classes, dropout=dropout).to(device)
+    model = SparseMLP(input_dim=len(encoder), hidden_dim=hidden_dim, num_classes=num_classes, dropout=dropout,
+                      hidden_layers=hidden_layers).to(device)
     criterion = nn.NLLLoss() # create the loss function
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay) # create the optimizer
 
@@ -280,6 +301,10 @@ def train_neural_network_model(training_set, validation_set, num_classes, encode
             torch.save(model.state_dict(), f"{save_to}.pt")
             best_epoch = epoch
             predictions = preds
+
+        if patience is not None and epoch - best_epoch >= patience:
+            print(f"Stopping early: no improvement in validation loss for {patience} epochs")
+            break
     
     time_training = time.time()
     print(f"Training done! Time taken: {time_training - time_dataloader:.3f} seconds")
@@ -319,10 +344,9 @@ def predict_probs(texts, model, encoder, batch_size=10):
     
     device = model.weight.device
         
-    vectors = [encoder(x) for x in texts]
     labels = [0 for _ in texts]
 
-    x_sparse = csr_matrix(vectors)
+    x_sparse = encode(texts, encoder)
 
     dl = DataLoader(
         SparseDataset(x_sparse, labels),

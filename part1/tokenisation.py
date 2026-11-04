@@ -25,7 +25,6 @@ VOCAB_SIZES = (8000, 16000, 32000, 64000)  # candidates, chosen later by cross-v
 MIN_FREQUENCY = 2  # as in the tutorial
 UNK = "[UNK]"
 
-
 def train_tokenizer(kind, vocab_size, corpus=None, min_frequency=MIN_FREQUENCY):
     """
     Constructs and trains a tokeniser.
@@ -51,10 +50,16 @@ def train_tokenizer(kind, vocab_size, corpus=None, min_frequency=MIN_FREQUENCY):
         # the replacements come before NFKC, which would turn ´ into a space plus an accent
         normalizers.Replace("\x96", "-"),  # dashes and ellipses mis-decoded from Windows-1252
         normalizers.Replace("\x97", "-"),
+        normalizers.Replace(Regex(r"-{2,}"), " - "),  # -- and --- used as dashes, so word--word splits like word - word
         normalizers.Replace("\x85", "..."),
+        normalizers.Replace("\x91", "'"),  # ‘ mis-decoded from Windows-1252
         normalizers.Replace("’", "'"),  # ’ and ´ used as apostrophes, so didn’t/didn´t split like didn't
         normalizers.Replace("´", "'"),
         normalizers.NFKC(),
+        # cap repeated punctuation (after NFKC, which turns … into ...): !!!!! -> !!, ????? -> ??, ...... -> ...
+        normalizers.Replace(Regex(r"!{3,}"), "!!"),
+        normalizers.Replace(Regex(r"\?{3,}"), "??"),
+        normalizers.Replace(Regex(r"\.{4,}"), "..."),
         normalizers.Lowercase(),
     ])
     # words, with clitics split off (didn't -> did n't, kubrick's -> kubrick 's), punctuation as its own token

@@ -1,0 +1,19 @@
+program: train_loglin.py
+name: loglin_sweep
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+parameters:
+  epochs:
+    values: [5, 10, 20, 30]
+  regularisation:
+    values: [0, 0.01, 0.1, 1]
+  tokenizer:
+    values: ['word', 'bpe_8k', 'bpe_16k', 'bpe_32k']
+  representation:
+    values: ['token_indicator', 'bow', 'tf-idf']
+  # cross-validation split seeds: every run is scored on the folds of all of them (one list, not a grid parameter)
+  split_seeds:
+    value: [0, 3, 5]
+
