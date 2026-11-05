@@ -21,6 +21,5 @@ parameters:
     values: [64, 128]
   weight_decay: 
     values: [1e-4]
-
-
-
+  save_models:
+    value: false

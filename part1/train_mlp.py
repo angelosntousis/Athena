@@ -90,7 +90,7 @@ DEFAULTS = dict(
     split_seeds=[0],
     seed=0,
     device="cpu",
-    save_models=True,
+    save_models=False,
 )
 
 
