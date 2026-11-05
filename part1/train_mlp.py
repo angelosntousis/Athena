@@ -41,6 +41,7 @@ Everything else a run produces goes to results/mlp/runs/{run}/:
     seed-{s}/fold-{f}/features.pickle        what the representation learned from the training data (TF-IDF
                                              weights, bigram vocabulary, Naive Bayes weights), if any
 """
+
 import argparse
 import json
 import os
@@ -58,19 +59,38 @@ import yaml
 from sklearn.metrics import accuracy_score, f1_score
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))  # so that `part1` can be imported when this file is run as a script
+sys.path.insert(
+    0, str(ROOT)
+)  # so that `part1` can be imported when this file is run as a script
 
 from part1 import smlp  # noqa: E402
 from part1.experiment import cross_validation_split  # noqa: E402
-from part1.features import (BagOfWords, NaiveBayesWeighting, NormalisedBagOfWords, TfidfEncoder,  # noqa: E402
-                            TokenIndicator)
+from part1.features import (
+    BagOfWords,
+    NaiveBayesWeighting,
+    NormalisedBagOfWords,
+    TfidfEncoder,  # noqa: E402
+    TokenIndicator,
+)
 from part1.tokenisation import get_tokenizer  # noqa: E402
-from part1.train_loglin import (append_jsonl, grid, load_train_split, numbers, parse_tokenizer,  # noqa: E402
-                                split_overrides)
+from part1.train_loglin import (
+    append_jsonl,
+    grid,
+    load_train_split,
+    numbers,
+    parse_tokenizer,  # noqa: E402
+    split_overrides,
+)
 
 RESULTS = ROOT / "results"
-REPRESENTATIONS = {"token_indicators": TokenIndicator, "token_indicator": TokenIndicator, "bow": BagOfWords,
-                   "bow_l1": NormalisedBagOfWords, "bow_l2": NormalisedBagOfWords, "tf-idf": TfidfEncoder}
+REPRESENTATIONS = {
+    "token_indicators": TokenIndicator,
+    "token_indicator": TokenIndicator,
+    "bow": BagOfWords,
+    "bow_l1": NormalisedBagOfWords,
+    "bow_l2": NormalisedBagOfWords,
+    "tf-idf": TfidfEncoder,
+}
 DEFAULTS = dict(
     tokenizer="bpe_16k",
     representation="tf-idf",
@@ -102,15 +122,21 @@ def make_encoder(config, tokenizer):
     bigrams = name.endswith("-bigrams")
     name = name.removesuffix("-bigrams")
     if name not in REPRESENTATIONS:
-        raise ValueError(f"Unknown representation={config['representation']}, expected one of {list(REPRESENTATIONS)}"
-                         " optionally followed by -bigrams and/or -nb")
+        raise ValueError(
+            f"Unknown representation={config['representation']}, expected one of {list(REPRESENTATIONS)}"
+            " optionally followed by -bigrams and/or -nb"
+        )
     kwargs = dict(ngram_range=(1, 2) if bigrams else (1, 1), min_df=config["min_df"])
     if name == "tf-idf":
         kwargs["sublinear_tf"] = config["sublinear_tf"]
     if name in ("bow_l1", "bow_l2"):
         kwargs["norm"] = name[-2:]
     encoder = REPRESENTATIONS[name](tokenizer, **kwargs)
-    return NaiveBayesWeighting(encoder, alpha=config["nb_alpha"]) if naive_bayes else encoder
+    return (
+        NaiveBayesWeighting(encoder, alpha=config["nb_alpha"])
+        if naive_bayes
+        else encoder
+    )
 
 
 def feature_state(encoder):
@@ -146,12 +172,28 @@ def cross_validate(config, texts, labels, log=print, save_to=None):
     num_classes = len(np.unique(labels))
 
     # repeated cross-validation: k folds for every split seed, as with my_seeds in the tutorial
-    splits = [(split_seed, fold, split)
-              for split_seed in config["split_seeds"]
-              for fold, split in cross_validation_split(list(zip(texts, labels)), k=config["folds"], seed=split_seed).items()]
-    records, predictions = [], {key: [] for key in ("split_seed", "fold", "row_id", "label", "prediction", "prob_positive")}
+    splits = [
+        (split_seed, fold, split)
+        for split_seed in config["split_seeds"]
+        for fold, split in cross_validation_split(
+            list(zip(texts, labels)), k=config["folds"], seed=split_seed
+        ).items()
+    ]
+    records, predictions = [], {
+        key: []
+        for key in (
+            "split_seed",
+            "fold",
+            "row_id",
+            "label",
+            "prediction",
+            "prob_positive",
+        )
+    }
     for split_seed, fold, split in splits:
-        train_ids = np.asarray(split["training_ids"], dtype=int)  # cross_validation_split returns object arrays
+        train_ids = np.asarray(
+            split["training_ids"], dtype=int
+        )  # cross_validation_split returns object arrays
         eval_ids = np.asarray(split["validation_ids"], dtype=int)
         # validation part for choosing the epoch, taken from the training folds only
         shuffled = np.random.default_rng(config["seed"]).permutation(train_ids)
@@ -167,9 +209,17 @@ def cross_validate(config, texts, labels, log=print, save_to=None):
         else:
             encoder.fit(fit_texts)  # features are learned from the training part only
 
-        fold_folder = Path(save_to) / f"seed-{split_seed}" / f"fold-{fold}" if save_to is not None else None
+        fold_folder = (
+            Path(save_to) / f"seed-{split_seed}" / f"fold-{fold}"
+            if save_to is not None
+            else None
+        )
         with tempfile.TemporaryDirectory() as tmp:
-            model_folder = fold_folder if fold_folder is not None and config["save_models"] else Path(tmp)
+            model_folder = (
+                fold_folder
+                if fold_folder is not None and config["save_models"]
+                else Path(tmp)
+            )
             model_folder.mkdir(parents=True, exist_ok=True)
             metrics, best_epoch, _ = smlp.train_neural_network_model(
                 [(texts[i], labels[i]) for i in fit_ids],
@@ -188,14 +238,18 @@ def cross_validate(config, texts, labels, log=print, save_to=None):
                 device=config["device"],
             )
             train_time = time.perf_counter() - start
-            model = smlp.load(str(model_folder / "model"), device=config["device"])  # the best epoch's weights
+            model = smlp.load(
+                str(model_folder / "model"), device=config["device"]
+            )  # the best epoch's weights
         if fold_folder is not None and feature_state(encoder):
             fold_folder.mkdir(parents=True, exist_ok=True)
             with open(fold_folder / "features.pickle", "wb") as f:
                 pickle.dump(feature_state(encoder), f, protocol=pickle.HIGHEST_PROTOCOL)
 
         start = time.perf_counter()
-        probs = smlp.predict_probs([texts[i] for i in eval_ids], model, encoder, batch_size=256)
+        probs = smlp.predict_probs(
+            [texts[i] for i in eval_ids], model, encoder, batch_size=256
+        )
         fold_predictions = probs.argmax(axis=1)  # the most probable class
         predict_time = time.perf_counter() - start
         predictions["split_seed"].append(np.full(len(eval_ids), split_seed))
@@ -224,13 +278,19 @@ def cross_validate(config, texts, labels, log=print, save_to=None):
         log(record)
 
     summary = dict(
-        accuracy=float(np.mean([r["accuracy"] for r in records])),  # over every fold of every split seed
+        accuracy=float(
+            np.mean([r["accuracy"] for r in records])
+        ),  # over every fold of every split seed
         accuracy_std=float(np.std([r["accuracy"] for r in records])),
         macro_f1=float(np.mean([r["macro_f1"] for r in records])),
         best_epoch=float(np.mean([r["best_epoch"] for r in records])),
         train_time=float(np.mean([r["train_time"] for r in records])),
-        **{f"accuracy_split_seed_{seed}": float(np.mean([r["accuracy"] for r in records if r["split_seed"] == seed]))
-           for seed in config["split_seeds"]},
+        **{
+            f"accuracy_split_seed_{seed}": float(
+                np.mean([r["accuracy"] for r in records if r["split_seed"] == seed])
+            )
+            for seed in config["split_seeds"]
+        },
     )
     predictions = {key: np.concatenate(values) for key, values in predictions.items()}
     return config, records, summary, predictions
@@ -246,17 +306,29 @@ def run(config, texts, labels, wandb_run=None):
             wandb_run.log({f"fold/{key}": value for key, value in record.items()})
 
     # the time, plus a random suffix so that runs started in the same second do not share a folder
-    run_id = wandb_run.id if wandb_run is not None else f"{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+    run_id = (
+        wandb_run.id
+        if wandb_run is not None
+        else f"{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+    )
     folder = RESULTS / "mlp" / "runs" / run_id
-    config, records, summary, predictions = cross_validate(config, texts, labels, log=log, save_to=folder)
+    config, records, summary, predictions = cross_validate(
+        config, texts, labels, log=log, save_to=folder
+    )
     folder.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(folder / "predictions.npz", **predictions)
     (folder / "config.json").write_text(json.dumps(config, indent=2))
     (folder / "summary.json").write_text(json.dumps(summary, indent=2))
     for record in records:
-        append_jsonl(RESULTS / "mlp" / "folds.jsonl", dict(run=run_id, config=config, **record))
-    append_jsonl(RESULTS / "mlp" / "runs.jsonl",
-                 dict(run=run_id, config=config, folder=str(folder.relative_to(ROOT)), **summary))
+        append_jsonl(
+            RESULTS / "mlp" / "folds.jsonl", dict(run=run_id, config=config, **record)
+        )
+    append_jsonl(
+        RESULTS / "mlp" / "runs.jsonl",
+        dict(
+            run=run_id, config=config, folder=str(folder.relative_to(ROOT)), **summary
+        ),
+    )
     print(json.dumps(summary), flush=True)
     if wandb_run is not None:
         wandb_run.summary.update(summary)
@@ -273,15 +345,33 @@ def read_sweep(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("sweep_config", nargs="?", help="YAML sweep config; without it, run a single configuration")
-    parser.add_argument("--local", action="store_true", help="run the sweep's configurations here, without W&B")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "sweep_config",
+        nargs="?",
+        help="YAML sweep config; without it, run a single configuration",
+    )
+    parser.add_argument(
+        "--local",
+        action="store_true",
+        help="run the sweep's configurations here, without W&B",
+    )
     parser.add_argument("--count", type=int, help="maximum number of runs")
-    parser.add_argument("--project", default=os.environ.get("WANDB_PROJECT", "athena-mlp"),
-                        help="W&B project (default: $WANDB_PROJECT, else athena-mlp)")
-    parser.add_argument("--entity", default=os.environ.get("WANDB_ENTITY"),
-                        help="W&B team or user the project belongs to (default: $WANDB_ENTITY, else your default entity)")
-    argv, overrides = split_overrides(sys.argv[1:], {"--local", "--count", "--project", "--entity", "--help"})
+    parser.add_argument(
+        "--project",
+        default=os.environ.get("WANDB_PROJECT", "athena-mlp"),
+        help="W&B project (default: $WANDB_PROJECT, else athena-mlp)",
+    )
+    parser.add_argument(
+        "--entity",
+        default=os.environ.get("WANDB_ENTITY"),
+        help="W&B team or user the project belongs to (default: $WANDB_ENTITY, else your default entity)",
+    )
+    argv, overrides = split_overrides(
+        sys.argv[1:], {"--local", "--count", "--project", "--entity", "--help"}
+    )
     args = parser.parse_args(argv)
 
     texts, labels = load_train_split()
@@ -289,6 +379,7 @@ def main():
     if args.sweep_config is None:
         if "WANDB_SWEEP_ID" in os.environ:
             import wandb
+
             with wandb.init() as wandb_run:  # started by a W&B agent, which also set the config
                 run(dict(wandb_run.config), texts, labels, wandb_run)
         else:
@@ -300,7 +391,7 @@ def main():
         configs = list(grid(sweep["parameters"]))
         if sweep["method"] == "random":
             random.Random(0).shuffle(configs)
-        for i, config in enumerate(configs[:args.count]):
+        for i, config in enumerate(configs[: args.count]):
             print(f"--- run {i + 1}/{len(configs[:args.count])}: {config}", flush=True)
             run(config, texts, labels)
         return
@@ -312,7 +403,13 @@ def main():
             run(dict(wandb_run.config), texts, labels, wandb_run)
 
     sweep_id = wandb.sweep(sweep, entity=args.entity, project=args.project)
-    wandb.agent(sweep_id, function=agent_run, entity=args.entity, project=args.project, count=args.count)
+    wandb.agent(
+        sweep_id,
+        function=agent_run,
+        entity=args.entity,
+        project=args.project,
+        count=args.count,
+    )
 
 
 if __name__ == "__main__":
