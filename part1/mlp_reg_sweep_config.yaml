@@ -1,0 +1,23 @@
+program: train_mlp.py
+name: mlp_sweep
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+parameters:
+  dropout_rate: 
+    values: [0.5]
+  hidden_layers:
+    values: [1]
+  hidden_dim: 
+    values: [512]
+  representation: 
+    values: ['tf-idf-bigrams-nb']
+  tokenizer:
+    values: ['bpe32k']
+  learning_rate: 
+    values: [1e-3, 1e-2]
+  batch_size: 
+    values: [64, 128]
+  weight_decay: 
+    values: [1e-3, 1e-2]
