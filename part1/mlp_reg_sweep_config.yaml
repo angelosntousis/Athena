@@ -10,7 +10,7 @@ parameters:
   hidden_layers:
     values: [1]
   hidden_dim: 
-    values: [512]
+    values: [128, 512]
   representation: 
     values: ['tf-idf-bigrams-nb']
   tokenizer:
@@ -18,6 +18,6 @@ parameters:
   learning_rate: 
     values: [1e-3, 1e-2]
   batch_size: 
-    values: [64, 128]
+    values: [64]
   weight_decay: 
     values: [1e-3, 1e-2]
