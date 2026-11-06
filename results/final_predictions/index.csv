@@ -1,0 +1,35 @@
+file,model,representation,split_seed,run,reviews,accuracy
+lr_bow_seed-0.npz,Logistic regression,bow,0,b5ee26c8,25000,0.86548
+lr_bow_seed-3.npz,Logistic regression,bow,3,oj916war,25000,0.86528
+lr_bow_seed-5.npz,Logistic regression,bow,5,um93apfl,25000,0.86444
+lr_tf-idf-bigrams-nb_seed-0.npz,Logistic regression,tf-idf + bigrams + NB,0,mqdym7k3,25000,0.9186
+lr_tf-idf-bigrams-nb_seed-3.npz,Logistic regression,tf-idf + bigrams + NB,3,gr4ufxim,25000,0.91932
+lr_tf-idf-bigrams-nb_seed-5.npz,Logistic regression,tf-idf + bigrams + NB,5,ukk5t4sh,25000,0.91824
+lr_tf-idf_seed-0.npz,Logistic regression,tf-idf,0,l7bsdr88,25000,0.89736
+lr_tf-idf_seed-3.npz,Logistic regression,tf-idf,3,l7bsdr88,25000,0.89648
+lr_tf-idf_seed-5.npz,Logistic regression,tf-idf,5,l7bsdr88,25000,0.89444
+lr_token-indicators_seed-0.npz,Logistic regression,token indicators,0,pt8mhelw,25000,0.88752
+lr_token-indicators_seed-3.npz,Logistic regression,token indicators,3,pt8mhelw,25000,0.88776
+lr_token-indicators_seed-5.npz,Logistic regression,token indicators,5,pt8mhelw,25000,0.88696
+mlp-1x128_bow_seed-0.npz,MLP 1x128,bow,0,ebzcoxn7,25000,0.89992
+mlp-1x128_bow_seed-3.npz,MLP 1x128,bow,3,cbzvjhw0,25000,0.8986
+mlp-1x128_bow_seed-5.npz,MLP 1x128,bow,5,33egfwpy,25000,0.89668
+mlp-1x128_tf-idf-bigrams-nb_seed-3.npz,MLP 1x128,tf-idf + bigrams + NB,3,3z2w3vqv,25000,0.92236
+mlp-1x128_tf-idf-bigrams-nb_seed-5.npz,MLP 1x128,tf-idf + bigrams + NB,5,ardxb48a,25000,0.92048
+mlp-1x128_tf-idf_seed-0.npz,MLP 1x128,tf-idf,0,3507rfj1,25000,0.90024
+mlp-1x128_tf-idf_seed-3.npz,MLP 1x128,tf-idf,3,kzgrrq52,25000,0.90056
+mlp-1x128_tf-idf_seed-5.npz,MLP 1x128,tf-idf,5,eonpxxj8,25000,0.9006
+mlp-1x128_token-indicators_seed-0.npz,MLP 1x128,token indicators,0,5axo3svz,25000,0.89704
+mlp-1x128_token-indicators_seed-3.npz,MLP 1x128,token indicators,3,ds64kfsr,25000,0.89608
+mlp-1x128_token-indicators_seed-5.npz,MLP 1x128,token indicators,5,5ozlb9xq,25000,0.89536
+mlp-2x256_bow_seed-0.npz,MLP 2x256,bow,0,tt175mu7,25000,0.89944
+mlp-2x256_bow_seed-3.npz,MLP 2x256,bow,3,v214dp5z,25000,0.89732
+mlp-2x256_bow_seed-5.npz,MLP 2x256,bow,5,m1wos1s7,25000,0.8966
+mlp-2x256_tf-idf-bigrams-nb_seed-3.npz,MLP 2x256,tf-idf + bigrams + NB,3,kaqwazik,25000,0.92248
+mlp-2x256_tf-idf-bigrams-nb_seed-5.npz,MLP 2x256,tf-idf + bigrams + NB,5,lmsezlnj,25000,0.92192
+mlp-2x256_tf-idf_seed-0.npz,MLP 2x256,tf-idf,0,zq5zfycr,25000,0.90088
+mlp-2x256_tf-idf_seed-3.npz,MLP 2x256,tf-idf,3,yq5vl5y6,25000,0.9006
+mlp-2x256_tf-idf_seed-5.npz,MLP 2x256,tf-idf,5,42jo5ads,25000,0.9012
+mlp-2x256_token-indicators_seed-0.npz,MLP 2x256,token indicators,0,fjky09px,25000,0.896
+mlp-2x256_token-indicators_seed-3.npz,MLP 2x256,token indicators,3,2nzhcuky,25000,0.89504
+mlp-2x256_token-indicators_seed-5.npz,MLP 2x256,token indicators,5,nt28l2vy,25000,0.89504

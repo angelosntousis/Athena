@@ -31,3 +31,7 @@ wandb/
 *.npz
 *.json
 *.jsonl
+
+# final cross-validation results, shared with the team
+!results/final_predictions/
+!results/final_predictions/*.npz
