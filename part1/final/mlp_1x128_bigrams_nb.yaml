@@ -1,0 +1,27 @@
+program: train_mlp.py
+name: final_mlp_1x128_bigrams_nb
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# best run with the tutorial's architecture (1 hidden layer of 128): ioh8lfwp in sweep gbnf8z9p
+parameters:
+  tokenizer:
+    value: bpe32k
+  representation:
+    value: tf-idf-bigrams-nb
+  hidden_layers:
+    value: 1
+  hidden_dim:
+    value: 128
+  dropout_rate:
+    value: 0.5
+  learning_rate:
+    value: 1e-3
+  batch_size:
+    value: 64
+  weight_decay:
+    value: 1e-3
+  # one run per split seed (5 folds each); seed 0 is already done (ioh8lfwp)
+  split_seeds:
+    values: [3, 5]

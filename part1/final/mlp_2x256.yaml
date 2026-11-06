@@ -1,0 +1,27 @@
+program: train_mlp.py
+name: final_mlp_2x256
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# best 2x256 runs for tf-idf and token indicators, sweep v4vnnbf7: tf-idf zq5zfycr, token_indicators fjky09px
+parameters:
+  tokenizer:
+    value: bpe32k
+  representation:
+    values: ['tf-idf', 'token_indicators']
+  hidden_layers:
+    value: 2
+  hidden_dim:
+    value: 256
+  dropout_rate:
+    value: 0.5
+  learning_rate:
+    value: 1e-4
+  batch_size:
+    value: 64
+  weight_decay:
+    value: 1e-4
+  # one run per split seed (5 folds each); seed 0 is already done (runs above)
+  split_seeds:
+    values: [3, 5]

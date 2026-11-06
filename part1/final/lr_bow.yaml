@@ -1,0 +1,19 @@
+program: train_loglin.py
+name: final_lr_bow
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# best bow configuration of the logistic regression sweep, trained for 100 epochs instead of 30
+parameters:
+  tokenizer:
+    value: bpe_32k
+  representation:
+    value: bow
+  regularisation:
+    value: 0
+  epochs:
+    value: 100
+  # one run per split seed (5 folds each), so agents on several laptops can share them
+  split_seeds:
+    values: [0, 3, 5]

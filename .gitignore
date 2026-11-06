@@ -22,7 +22,8 @@ env/
 !.env.example
 
 # Experiment outputs: only code, Markdown and YAML configs are tracked
-results/
+results/*
+!results/final_folds.csv
 wandb/
 *.pickle
 *.pkl

@@ -1,0 +1,181 @@
+model,rep,run,seed,fold,acc,f1
+Logistic regression,token indicators,pt8mhelw,0,0,0.883,0.8829707848267241
+Logistic regression,token indicators,pt8mhelw,0,1,0.8934,0.8933785008409095
+Logistic regression,token indicators,pt8mhelw,0,2,0.8908,0.8907597296667444
+Logistic regression,token indicators,pt8mhelw,0,3,0.887,0.8869808997720614
+Logistic regression,token indicators,pt8mhelw,0,4,0.8834,0.883399771463552
+Logistic regression,token indicators,pt8mhelw,3,0,0.8806,0.8805997659755413
+Logistic regression,token indicators,pt8mhelw,3,1,0.886,0.8859903502232429
+Logistic regression,token indicators,pt8mhelw,3,2,0.8854,0.8853989685907173
+Logistic regression,token indicators,pt8mhelw,3,3,0.892,0.8919313720985375
+Logistic regression,token indicators,pt8mhelw,3,4,0.8948,0.8947979632885692
+Logistic regression,token indicators,pt8mhelw,5,0,0.8934,0.8933947763440409
+Logistic regression,token indicators,pt8mhelw,5,1,0.8844,0.8843968740914754
+Logistic regression,token indicators,pt8mhelw,5,2,0.8858,0.8857436899201403
+Logistic regression,token indicators,pt8mhelw,5,3,0.8862,0.886179562402225
+Logistic regression,token indicators,pt8mhelw,5,4,0.885,0.8849906842454239
+Logistic regression,tf-idf,l7bsdr88,0,0,0.8922,0.8921594131167205
+Logistic regression,tf-idf,l7bsdr88,0,1,0.9054,0.9053798307647258
+Logistic regression,tf-idf,l7bsdr88,0,2,0.8956,0.8955795335885834
+Logistic regression,tf-idf,l7bsdr88,0,3,0.8984,0.898388147993582
+Logistic regression,tf-idf,l7bsdr88,0,4,0.8952,0.8951918836594706
+Logistic regression,tf-idf,l7bsdr88,3,0,0.8918,0.8917999956719999
+Logistic regression,tf-idf,l7bsdr88,3,1,0.8994,0.8993950703584476
+Logistic regression,tf-idf,l7bsdr88,3,2,0.8966,0.8965993010112749
+Logistic regression,tf-idf,l7bsdr88,3,3,0.898,0.8979351847597299
+Logistic regression,tf-idf,l7bsdr88,3,4,0.8966,0.8965999627759866
+Logistic regression,tf-idf,l7bsdr88,5,0,0.8996,0.8995907462831775
+Logistic regression,tf-idf,l7bsdr88,5,1,0.8878,0.8877900851319223
+Logistic regression,tf-idf,l7bsdr88,5,2,0.897,0.8969673551368016
+Logistic regression,tf-idf,l7bsdr88,5,3,0.896,0.8959911966948882
+Logistic regression,tf-idf,l7bsdr88,5,4,0.8918,0.8917805681188115
+Logistic regression,bow,b5ee26c8,0,0,0.861,0.8609498028788393
+Logistic regression,bow,b5ee26c8,0,1,0.874,0.873955450814536
+Logistic regression,bow,b5ee26c8,0,2,0.8698,0.8697623613224221
+Logistic regression,bow,b5ee26c8,0,3,0.8664,0.866395810172607
+Logistic regression,bow,b5ee26c8,0,4,0.8562,0.8561998561998563
+Logistic regression,bow,oj916war,3,0,0.8604,0.8603996426230851
+Logistic regression,bow,oj916war,3,1,0.863,0.8629980216914332
+Logistic regression,bow,oj916war,3,2,0.8672,0.8671964089908991
+Logistic regression,bow,oj916war,3,3,0.8646,0.8644763970531684
+Logistic regression,bow,oj916war,3,4,0.8712,0.8711890974452078
+Logistic regression,bow,um93apfl,5,0,0.87,0.8699869986998701
+Logistic regression,bow,um93apfl,5,1,0.8554,0.8553951354923579
+Logistic regression,bow,um93apfl,5,2,0.8652,0.8651523394428526
+Logistic regression,bow,um93apfl,5,3,0.8738,0.8737812135958316
+Logistic regression,bow,um93apfl,5,4,0.8578,0.857784020612556
+Logistic regression,tf-idf + bigrams + NB,mqdym7k3,0,0,0.9122,0.912145090681676
+Logistic regression,tf-idf + bigrams + NB,mqdym7k3,0,1,0.9236,0.9235773911353935
+Logistic regression,tf-idf + bigrams + NB,mqdym7k3,0,2,0.9214,0.9213524056217861
+Logistic regression,tf-idf + bigrams + NB,mqdym7k3,0,3,0.9194,0.9193902462197926
+Logistic regression,tf-idf + bigrams + NB,mqdym7k3,0,4,0.9164,0.9163997859834521
+Logistic regression,tf-idf + bigrams + NB,gr4ufxim,3,0,0.9162,0.9161990312608014
+Logistic regression,tf-idf + bigrams + NB,gr4ufxim,3,1,0.921,0.9209911225625311
+Logistic regression,tf-idf + bigrams + NB,gr4ufxim,3,2,0.9202,0.9201956299126941
+Logistic regression,tf-idf + bigrams + NB,gr4ufxim,3,3,0.9202,0.9201417833600696
+Logistic regression,tf-idf + bigrams + NB,gr4ufxim,3,4,0.919,0.9189972750683333
+Logistic regression,tf-idf + bigrams + NB,ukk5t4sh,5,0,0.9266,0.9265904596961421
+Logistic regression,tf-idf + bigrams + NB,ukk5t4sh,5,1,0.9114,0.9113989757721599
+Logistic regression,tf-idf + bigrams + NB,ukk5t4sh,5,2,0.918,0.9179300238555401
+Logistic regression,tf-idf + bigrams + NB,ukk5t4sh,5,3,0.9208,0.9207844737568563
+Logistic regression,tf-idf + bigrams + NB,ukk5t4sh,5,4,0.9144,0.9143892609888984
+MLP 1x128,token indicators,5axo3svz,0,0,0.8928,0.8927422695991891
+MLP 1x128,token indicators,5axo3svz,0,1,0.902,0.9019736348288236
+MLP 1x128,token indicators,5axo3svz,0,2,0.8978,0.8977704556616862
+MLP 1x128,token indicators,5axo3svz,0,3,0.8992,0.8991813525829737
+MLP 1x128,token indicators,5axo3svz,0,4,0.8934,0.8933772722993634
+MLP 1x128,bow,ebzcoxn7,0,0,0.8954,0.8953823196120144
+MLP 1x128,bow,ebzcoxn7,0,1,0.904,0.903997788109038
+MLP 1x128,bow,ebzcoxn7,0,2,0.8992,0.8991976775144899
+MLP 1x128,bow,ebzcoxn7,0,3,0.9024,0.9023808666498634
+MLP 1x128,bow,ebzcoxn7,0,4,0.8986,0.8985633813806784
+MLP 1x128,tf-idf,3507rfj1,0,0,0.8964,0.8963707516809545
+MLP 1x128,tf-idf,3507rfj1,0,1,0.9052,0.905188941238106
+MLP 1x128,tf-idf,3507rfj1,0,2,0.897,0.896971609496713
+MLP 1x128,tf-idf,3507rfj1,0,3,0.9038,0.9037928845217393
+MLP 1x128,tf-idf,3507rfj1,0,4,0.8988,0.8987963566688401
+MLP 1x128,tf-idf + bigrams + NB,ioh8lfwp,0,0,0.919,0.9189600602761064
+MLP 1x128,tf-idf + bigrams + NB,ioh8lfwp,0,1,0.924,0.9239992217520308
+MLP 1x128,tf-idf + bigrams + NB,ioh8lfwp,0,2,0.9252,0.9251788824877933
+MLP 1x128,tf-idf + bigrams + NB,ioh8lfwp,0,3,0.9258,0.9257850352945167
+MLP 1x128,tf-idf + bigrams + NB,ioh8lfwp,0,4,0.9214,0.9213875194825931
+MLP 1x128,bow,cbzvjhw0,3,0,0.8942,0.8941997926315935
+MLP 1x128,bow,cbzvjhw0,3,1,0.9014,0.9013051542532373
+MLP 1x128,bow,cbzvjhw0,3,2,0.8976,0.8975927741461438
+MLP 1x128,bow,cbzvjhw0,3,3,0.8978,0.897747773652871
+MLP 1x128,bow,cbzvjhw0,3,4,0.902,0.9019964718729874
+MLP 1x128,bow,33egfwpy,5,0,0.9012,0.9012
+MLP 1x128,bow,33egfwpy,5,1,0.8902,0.8901569371256308
+MLP 1x128,bow,33egfwpy,5,2,0.8998,0.8997011093057311
+MLP 1x128,bow,33egfwpy,5,3,0.898,0.8979928023721354
+MLP 1x128,bow,33egfwpy,5,4,0.8942,0.8941928855296231
+MLP 1x128,tf-idf,kzgrrq52,3,0,0.895,0.8949999957999999
+MLP 1x128,tf-idf,kzgrrq52,3,1,0.904,0.9039938556067588
+MLP 1x128,tf-idf,kzgrrq52,3,2,0.9004,0.9003936251920123
+MLP 1x128,tf-idf,kzgrrq52,3,3,0.9028,0.9027382348886837
+MLP 1x128,tf-idf,kzgrrq52,3,4,0.9006,0.9005988509227167
+MLP 1x128,tf-idf,eonpxxj8,5,0,0.9048,0.9047996191984768
+MLP 1x128,tf-idf,eonpxxj8,5,1,0.8944,0.894376864308358
+MLP 1x128,tf-idf,eonpxxj8,5,2,0.9016,0.9015666744132893
+MLP 1x128,tf-idf,eonpxxj8,5,3,0.9034,0.903395266368052
+MLP 1x128,tf-idf,eonpxxj8,5,4,0.8988,0.8987844370950477
+MLP 1x128,token indicators,ds64kfsr,3,0,0.8908,0.8907999301119554
+MLP 1x128,token indicators,ds64kfsr,3,1,0.9004,0.9003998565757935
+MLP 1x128,token indicators,ds64kfsr,3,2,0.892,0.8919930875576036
+MLP 1x128,token indicators,ds64kfsr,3,3,0.8976,0.8975369811448833
+MLP 1x128,token indicators,ds64kfsr,3,4,0.8996,0.8995976867307023
+MLP 1x128,token indicators,5ozlb9xq,5,0,0.9028,0.9027965006740243
+MLP 1x128,token indicators,5ozlb9xq,5,1,0.8936,0.8935825645673787
+MLP 1x128,token indicators,5ozlb9xq,5,2,0.897,0.8969492124498638
+MLP 1x128,token indicators,5ozlb9xq,5,3,0.8922,0.8921642804962715
+MLP 1x128,token indicators,5ozlb9xq,5,4,0.8912,0.8911492145775533
+MLP 1x128,tf-idf + bigrams + NB,3z2w3vqv,3,0,0.9154,0.91539820982612
+MLP 1x128,tf-idf + bigrams + NB,3z2w3vqv,3,1,0.9248,0.9247835245832248
+MLP 1x128,tf-idf + bigrams + NB,3z2w3vqv,3,2,0.9228,0.9227979124555528
+MLP 1x128,tf-idf + bigrams + NB,3z2w3vqv,3,3,0.9244,0.9243440266847024
+MLP 1x128,tf-idf + bigrams + NB,3z2w3vqv,3,4,0.9244,0.9243996975987904
+MLP 1x128,tf-idf + bigrams + NB,ardxb48a,5,0,0.925,0.9249895555457142
+MLP 1x128,tf-idf + bigrams + NB,ardxb48a,5,1,0.9154,0.9153998341836751
+MLP 1x128,tf-idf + bigrams + NB,ardxb48a,5,2,0.9228,0.9227626171066796
+MLP 1x128,tf-idf + bigrams + NB,ardxb48a,5,3,0.922,0.921992199219922
+MLP 1x128,tf-idf + bigrams + NB,ardxb48a,5,4,0.9172,0.9171846824788713
+MLP 2x256,token indicators,fjky09px,0,0,0.892,0.8919514386545889
+MLP 2x256,token indicators,fjky09px,0,1,0.9006,0.9005933158945607
+MLP 2x256,token indicators,fjky09px,0,2,0.8972,0.8971999835519974
+MLP 2x256,token indicators,fjky09px,0,3,0.8976,0.8975983615737853
+MLP 2x256,token indicators,fjky09px,0,4,0.8926,0.8925990333913005
+MLP 2x256,bow,tt175mu7,0,0,0.8948,0.8947805386084211
+MLP 2x256,bow,tt175mu7,0,1,0.902,0.9019937275985663
+MLP 2x256,bow,tt175mu7,0,2,0.903,0.9029999961199999
+MLP 2x256,bow,tt175mu7,0,3,0.9012,0.9011969015348321
+MLP 2x256,bow,tt175mu7,0,4,0.8962,0.8961488179834549
+MLP 2x256,tf-idf,zq5zfycr,0,0,0.8974,0.8973547334374459
+MLP 2x256,tf-idf,zq5zfycr,0,1,0.9068,0.9067498090172055
+MLP 2x256,tf-idf,zq5zfycr,0,2,0.8962,0.89614506073713
+MLP 2x256,tf-idf,zq5zfycr,0,3,0.905,0.9049953447718938
+MLP 2x256,tf-idf,zq5zfycr,0,4,0.899,0.898999090991819
+MLP 2x256,tf-idf + bigrams + NB,o2poqoun,0,0,0.918,0.9179671868747499
+MLP 2x256,tf-idf + bigrams + NB,o2poqoun,0,1,0.9224,0.9223872839325995
+MLP 2x256,tf-idf + bigrams + NB,o2poqoun,0,2,0.9286,0.9285960899218841
+MLP 2x256,tf-idf + bigrams + NB,o2poqoun,0,3,0.9254,0.9253804168365947
+MLP 2x256,tf-idf + bigrams + NB,o2poqoun,0,4,0.9202,0.9201903430315068
+MLP 2x256,tf-idf,yq5vl5y6,3,0,0.8998,0.8997850840119044
+MLP 2x256,tf-idf,yq5vl5y6,3,1,0.9046,0.9045876002045226
+MLP 2x256,tf-idf,yq5vl5y6,3,2,0.8998,0.8997638147371201
+MLP 2x256,tf-idf,yq5vl5y6,3,3,0.8994,0.8993995130936434
+MLP 2x256,tf-idf,yq5vl5y6,3,4,0.8994,0.8993221921629913
+MLP 2x256,tf-idf,42jo5ads,5,0,0.907,0.9069743658562553
+MLP 2x256,tf-idf,42jo5ads,5,1,0.8942,0.8941977612246275
+MLP 2x256,tf-idf,42jo5ads,5,2,0.8976,0.8975126151561867
+MLP 2x256,tf-idf,42jo5ads,5,3,0.9048,0.9047888945766634
+MLP 2x256,tf-idf,42jo5ads,5,4,0.9024,0.9023999843839975
+MLP 2x256,token indicators,2nzhcuky,3,0,0.892,0.891989198919892
+MLP 2x256,token indicators,2nzhcuky,3,1,0.897,0.8969901069298696
+MLP 2x256,token indicators,2nzhcuky,3,2,0.8932,0.8931766014027712
+MLP 2x256,token indicators,2nzhcuky,3,3,0.8954,0.8953711684791861
+MLP 2x256,token indicators,2nzhcuky,3,4,0.8976,0.8975967886352916
+MLP 2x256,token indicators,nt28l2vy,5,0,0.899,0.898984964922179
+MLP 2x256,token indicators,nt28l2vy,5,1,0.891,0.8909968214673141
+MLP 2x256,token indicators,nt28l2vy,5,2,0.898,0.8979669412889777
+MLP 2x256,token indicators,nt28l2vy,5,3,0.894,0.8939876347177135
+MLP 2x256,token indicators,nt28l2vy,5,4,0.8932,0.8931986158540615
+MLP 2x256,bow,v214dp5z,3,0,0.896,0.8959951908176234
+MLP 2x256,bow,v214dp5z,3,1,0.8996,0.8995989718934723
+MLP 2x256,bow,v214dp5z,3,2,0.8978,0.8977440087094088
+MLP 2x256,bow,v214dp5z,3,3,0.8928,0.8927995711982848
+MLP 2x256,bow,v214dp5z,3,4,0.9004,0.9003387043167029
+MLP 2x256,bow,m1wos1s7,5,0,0.9004,0.9003617229594921
+MLP 2x256,bow,m1wos1s7,5,1,0.8912,0.8911217993211444
+MLP 2x256,bow,m1wos1s7,5,2,0.8986,0.8985618227276018
+MLP 2x256,bow,m1wos1s7,5,3,0.8986,0.8985463310091037
+MLP 2x256,bow,m1wos1s7,5,4,0.8942,0.8941420364134586
+MLP 2x256,tf-idf + bigrams + NB,kaqwazik,3,0,0.9188,0.9187991685034855
+MLP 2x256,tf-idf + bigrams + NB,kaqwazik,3,1,0.925,0.9249989169843613
+MLP 2x256,tf-idf + bigrams + NB,kaqwazik,3,2,0.9206,0.9205801736345461
+MLP 2x256,tf-idf + bigrams + NB,kaqwazik,3,3,0.9232,0.9231739897859819
+MLP 2x256,tf-idf + bigrams + NB,kaqwazik,3,4,0.9248,0.924795186891961
+MLP 2x256,tf-idf + bigrams + NB,lmsezlnj,5,0,0.9262,0.9261963836227975
+MLP 2x256,tf-idf + bigrams + NB,lmsezlnj,5,1,0.9164,0.9163665466186475
+MLP 2x256,tf-idf + bigrams + NB,lmsezlnj,5,2,0.9236,0.9235681921388406
+MLP 2x256,tf-idf + bigrams + NB,lmsezlnj,5,3,0.9244,0.924383436948029
+MLP 2x256,tf-idf + bigrams + NB,lmsezlnj,5,4,0.919,0.9189915718831387

@@ -1,0 +1,27 @@
+program: train_mlp.py
+name: final_mlp_2x256_bigrams_nb
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# best run with 2 hidden layers of 256: o2poqoun in sweep v4vnnbf7
+parameters:
+  tokenizer:
+    value: bpe32k
+  representation:
+    value: tf-idf-bigrams-nb
+  hidden_layers:
+    value: 2
+  hidden_dim:
+    value: 256
+  dropout_rate:
+    value: 0.1
+  learning_rate:
+    value: 1e-4
+  batch_size:
+    value: 64
+  weight_decay:
+    value: 1e-4
+  # one run per split seed (5 folds each); seed 0 is already done (o2poqoun)
+  split_seeds:
+    values: [3, 5]

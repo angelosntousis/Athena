@@ -1,0 +1,28 @@
+program: train_mlp.py
+name: final_mlp_1x128
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# best 1x128 (tutorial architecture) runs for the unigram representations, sweep v4vnnbf7:
+# bow ebzcoxn7, tf-idf 3507rfj1, token_indicators 5axo3svz (all with these settings)
+parameters:
+  tokenizer:
+    value: bpe32k
+  representation:
+    values: ['bow', 'tf-idf', 'token_indicators']
+  hidden_layers:
+    value: 1
+  hidden_dim:
+    value: 128
+  dropout_rate:
+    value: 0.5
+  learning_rate:
+    value: 1e-4
+  batch_size:
+    value: 64
+  weight_decay:
+    value: 1e-4
+  # one run per split seed (5 folds each); seed 0 is already done (runs above)
+  split_seeds:
+    values: [3, 5]

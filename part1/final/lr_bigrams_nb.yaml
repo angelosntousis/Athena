@@ -1,0 +1,21 @@
+program: train_loglin.py
+name: final_lr_bigrams_nb
+method: grid
+metric:
+  goal: maximize
+  name: accuracy
+# tf-idf with unigrams and bigrams, Naive Bayes weighted
+parameters:
+  tokenizer:
+    value: bpe_32k
+  representation:
+    value: tf-idf-nb
+  ngram_range:
+    value: [1, 2]
+  regularisation:
+    value: 0.1
+  epochs:
+    value: 10
+  # one run per split seed (5 folds each), so agents on several laptops can share them
+  split_seeds:
+    values: [0, 3, 5]
