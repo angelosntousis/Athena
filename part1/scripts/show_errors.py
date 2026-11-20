@@ -1,5 +1,5 @@
 """Prints 10 misclassified test reviews of the best model (MLP 2x256, tf-idf + bigrams + NB),
-one negative and one positive review per confidence band. Run from the repo root: python part1/show_errors.py
+one negative and one positive review per confidence band. Run from the repo root: python part1/scripts/show_errors.py
 """
 from datasets import load_dataset
 

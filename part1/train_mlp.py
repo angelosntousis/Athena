@@ -10,8 +10,8 @@ The mean accuracy over the folds is logged as `accuracy`, the metric the sweep m
 
 Usage, from the repository root or from part1/:
 
-    python part1/train_mlp.py part1/mlp_sweep_config.yaml --count 20         # create a W&B sweep and run an agent
-    python part1/train_mlp.py part1/mlp_sweep_config.yaml --local --count 5  # run configurations here, without W&B
+    python part1/train_mlp.py part1/configs/mlp_sweep_config.yaml --count 20         # create a W&B sweep and run an agent
+    python part1/train_mlp.py part1/configs/mlp_sweep_config.yaml --local --count 5  # run configurations here, without W&B
     python part1/train_mlp.py --representation tf-idf --hidden_layers 2 --hidden_dim 128 --dropout_rate 0.5   # one run
 
 For a sweep with method `random`, --local runs the grid in a random (but fixed) order, so --count picks a random
@@ -52,6 +52,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import torch
@@ -126,7 +127,9 @@ def make_encoder(config, tokenizer):
             f"Unknown representation={config['representation']}, expected one of {list(REPRESENTATIONS)}"
             " optionally followed by -bigrams and/or -nb"
         )
-    kwargs = dict(ngram_range=(1, 2) if bigrams else (1, 1), min_df=config["min_df"])
+    kwargs: dict[str, Any] = dict(
+        ngram_range=(1, 2) if bigrams else (1, 1), min_df=config["min_df"]
+    )
     if name == "tf-idf":
         kwargs["sublinear_tf"] = config["sublinear_tf"]
     if name in ("bow_l1", "bow_l2"):
@@ -168,7 +171,7 @@ def cross_validate(config, texts, labels, log=print, save_to=None):
     if isinstance(config["split_seeds"], int):
         config["split_seeds"] = [config["split_seeds"]]
     kind, vocab_size = parse_tokenizer(config["tokenizer"])
-    tokenizer = get_tokenizer(kind, vocab_size, folder=RESULTS / "tokenizers")
+    tokenizer = get_tokenizer(kind, vocab_size, folder=str(RESULTS / "tokenizers"))
     num_classes = len(np.unique(labels))
 
     # repeated cross-validation: k folds for every split seed, as with my_seeds in the tutorial
@@ -316,7 +319,15 @@ def run(config, texts, labels, wandb_run=None):
         config, texts, labels, log=log, save_to=folder
     )
     folder.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(folder / "predictions.npz", **predictions)
+    np.savez_compressed(
+        folder / "predictions.npz",
+        split_seed=predictions["split_seed"],
+        fold=predictions["fold"],
+        row_id=predictions["row_id"],
+        label=predictions["label"],
+        prediction=predictions["prediction"],
+        prob_positive=predictions["prob_positive"],
+    )
     (folder / "config.json").write_text(json.dumps(config, indent=2))
     (folder / "summary.json").write_text(json.dumps(summary, indent=2))
     for record in records:

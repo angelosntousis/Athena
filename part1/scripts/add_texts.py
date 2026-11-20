@@ -1,6 +1,6 @@
 """Adds the review text to results/test/<run>/test_errors.csv (the best model's misclassified test reviews).
 
-Run from the repo root:  python part1/add_texts.py
+Run from the repo root:  python part1/scripts/add_texts.py
 Writes results/test/<run>/test_errors_with_text.csv, sorted from most to least confident mistake.
 """
 from pathlib import Path

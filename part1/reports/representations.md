@@ -67,6 +67,6 @@ Both unigram models get this review right, while the bigram + NB model does not.
 - A controlled test of ordering would hold tokenizer, weighting, classifier and other settings fixed, changing only unigram versus unigram-plus-bigram features. Model coefficients or feature-ablation tests would be needed to investigate individual predictions more closely.
 - The saved files contain **out-of-fold predictions on the training split**, not official test-set predictions. These examples were selected after inspecting predictions and should not be used as an independent final evaluation.
 
-**Sources:** [saved prediction index](../results/final_predictions/index.csv); [feature implementation](features.py); [IMDb dataset](https://huggingface.co/datasets/stanfordnlp/imdb). Review IDs are zero-based indices in the dataset's training split. The example probabilities come from the seed-0 `lr_bow`, `lr_tf-idf` and `lr_tf-idf-bigrams-nb` prediction files.
+**Sources:** [saved prediction index](../../results/final_predictions/index.csv); [feature implementation](../features.py); [IMDb dataset](https://huggingface.co/datasets/stanfordnlp/imdb). Review IDs are zero-based indices in the dataset's training split. The example probabilities come from the seed-0 `lr_bow`, `lr_tf-idf` and `lr_tf-idf-bigrams-nb` prediction files.
 
 *AI assistance: Codex helped select and verify these examples and draft this analysis.*

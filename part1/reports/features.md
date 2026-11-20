@@ -1,6 +1,6 @@
 # Task 3: Feature representation (IMDb)
 
-*Angelos · Implementation: [features.py](features.py)*
+*Angelos · Implementation: [features.py](../features.py)*
 
 A tokenizer decides which pieces of a review the model can see. Feature representation decides how to turn those pieces into numbers. For IMDb sentiment classification, we compare **token indicators, bag-of-words counts and TF-IDF**, and ask whether individual tokens or adjacent pairs provide the more useful evidence.
 
@@ -163,7 +163,7 @@ For the tested 1,000-token BPE setup, **logarithmic TF-IDF over bigrams is the s
 
 The length groups and review examples are descriptive evidence, not significance tests. The existing CV grid includes paired Bayesian **LR-versus-MLP comparisons within each configuration**, using a ROPE of ±0.5 percentage points. Those probabilities do not establish superiority between representations. Further model changes motivated by inspected test results need fresh held-out evidence for an independent final evaluation.
 
-The implementation remains reusable: [features.py](features.py) accepts a trained tokenizer and returns sparse matrices for all three representations and unit choices. Fit it on training text, then reuse `transform()` for validation/test. If the team adopts Task 2's newer tokenizers, evaluate the representation choices again under that setup before transferring these conclusions.
+The implementation remains reusable: [features.py](../features.py) accepts a trained tokenizer and returns sparse matrices for all three representations and unit choices. Fit it on training text, then reuse `transform()` for validation/test. If the team adopts Task 2's newer tokenizers, evaluate the representation choices again under that setup before transferring these conclusions.
 
 
 *AI assistance: Codex helped implement the encoders, run experiments and draft the analysis.*

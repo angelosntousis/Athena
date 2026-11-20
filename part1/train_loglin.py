@@ -9,9 +9,9 @@ The mean accuracy over the folds is logged as `accuracy`, the metric the sweep m
 
 Usage, from the repository root or from part1/:
 
-    python part1/train_loglin.py part1/loglin_sweep_config.yaml          # create a W&B sweep and run an agent
-    python part1/train_loglin.py part1/loglin_sweep_config.yaml --count 20
-    python part1/train_loglin.py part1/loglin_sweep_config.yaml --local  # every grid configuration, without W&B
+    python part1/train_loglin.py part1/configs/loglin_sweep_config.yaml          # create a W&B sweep and run an agent
+    python part1/train_loglin.py part1/configs/loglin_sweep_config.yaml --count 20
+    python part1/train_loglin.py part1/configs/loglin_sweep_config.yaml --local  # every grid configuration, without W&B
     python part1/train_loglin.py --tokenizer bpe_16k --representation bow --regularisation l2   # one run
 
 When a W&B agent starts this script (as the sweep's `program`), it is called with --key=value arguments
