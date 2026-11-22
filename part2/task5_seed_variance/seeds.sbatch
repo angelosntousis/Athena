@@ -7,13 +7,15 @@
 #SBATCH --time=00:59:00
 #SBATCH --array=0-15%2
 #SBATCH --output=results/%x-%A_%a.out
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=stepan.maschan@student.uva.nl
 
 # Reruns 8 fixed configurations with training seeds 1-2.
 # With the published seed-0 runs, each configuration has 3 seeds on the same five folds.
 # Array index = 2 * configuration + (seed - 1).
 
 set -euo pipefail
-cd "$SLURM_SUBMIT_DIR"
+cd "$HOME/Athena"
 source .venv/bin/activate
 export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export WANDB_BASE_URL=https://api.forge.coreweave.com
