@@ -1,0 +1,31 @@
+program: part2/project.py
+name: imdb_lstm_interlayer_dropout_128
+method: grid
+metric:
+  name: accuracy
+  goal: maximize
+
+command:
+  - ${env}
+  - ${interpreter}
+  - -m
+  - part2.project
+  - train
+  - --encoder=lstm
+  - --embedding=fasttext
+  - --weights=frozen
+  - --device=cuda
+
+parameters:
+  lstm_dropout:
+    values: [0.0, 0.1, 0.5]
+  classifier_dropout:
+    value: 0.1
+  num_layers:
+    value: 2
+  hidden_size:
+    value: 128
+  learning_rate:
+    value: 0.001
+  batch_size:
+    value: 64

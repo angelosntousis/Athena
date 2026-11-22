@@ -5,6 +5,7 @@ Run from the repository root with python -m part2.project.
 
 import argparse
 import csv
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -21,6 +22,10 @@ from part2.clslib import PretrainedEmbeddings
 from part2.task1_choose_embeddings.embedding_check import ImdbTokenizer
 from part2.task3_embed_and_pool.embed_and_pool import random_embedding_table
 from part2.task4_recurrent_encoder.lstm import half_training_indices
+
+
+TRAINING_DEFAULTS = dict(classifier_dropout=0.1, learning_rate=0.001, batch_size=64)
+LSTM_DEFAULTS = dict(hidden_size=20, num_layers=1, lstm_dropout=0.0)
 
 
 class Fold(NamedTuple):
@@ -66,14 +71,17 @@ def check_baselines(labels, folds, split_seed):
 
 
 def train_fold(texts, labels, fold, *, encoder, embeddings, tokenizer,
-               freeze_embeddings=True, epochs=20, device="cpu", history_path=None):
+               freeze_embeddings=True, epochs=20, device="cpu", history_path=None, settings=None):
     """Fit one tutorial encoder and return outer-fold scores and review predictions."""
     if encoder not in ("embed-and-pool", "lstm") or epochs < 1:
         raise ValueError("Choose embed-and-pool or lstm and at least one epoch.")
     torch.manual_seed(0)
+    if settings is None:
+        settings = {**TRAINING_DEFAULTS, **LSTM_DEFAULTS}
     enc_kwargs = {"freeze_embeddings": freeze_embeddings}
     if encoder == "lstm":
-        enc_kwargs["hidden_size"] = 20
+        enc_kwargs.update(hidden_size=settings["hidden_size"], num_layers=settings["num_layers"],
+                          lstm_dropout=settings.get("lstm_dropout", 0.0))
 
     with TemporaryDirectory() as tmp:
         checkpoint = str(Path(tmp) / "model")
@@ -83,9 +91,10 @@ def train_fold(texts, labels, fold, *, encoder, embeddings, tokenizer,
             [(texts[i], labels[i]) for i in fold.validation],
             tokenizer, embeddings, num_classes=2, enc_type=encoder, device=device,
             enc_kwargs=enc_kwargs, save_to=checkpoint,
-            regressor_kwargs={"hidden_size1": 50, "hidden_size2": 50, "dropout": 0.1},
-            opt_kwargs={"learning_rate": 1e-3, "weight_decay": 1e-4,
-                        "batch_size": 64, "num_epochs": epochs},
+            regressor_kwargs={"hidden_size1": 50, "hidden_size2": 50,
+                              "dropout": settings["classifier_dropout"]},
+            opt_kwargs={"learning_rate": settings["learning_rate"], "weight_decay": 1e-4,
+                        "batch_size": settings["batch_size"], "num_epochs": epochs},
         )
         train_seconds = perf_counter() - start
         if history_path is not None:
@@ -151,13 +160,16 @@ def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *
     tokenizer = ImdbTokenizer(vectors, embedding)
     config = dict(encoder=encoder, embedding=embedding, split_seed=split_seed, folds=len(folds),
                   weights=weights, freeze_embeddings=(weights == "frozen"), fit_fraction=0.5 if half_data else 1.0,
-                  epochs=20, device=device, dataset="stanfordnlp/imdb")
+                  epochs=20, device=device, dataset="stanfordnlp/imdb", **TRAINING_DEFAULTS)
+    if encoder == "lstm":
+        config.update(LSTM_DEFAULTS)
     name = f"{encoder}-{embedding}"
     if weights != "frozen":
         name += f"-{weights}"
     if half_data:
         name += "-half-data"
-    with wandb.init(entity="nlp1-athena", project="Part 2", name=name, config=config) as run:
+    run_name = None if os.environ.get("WANDB_SWEEP_ID") else name
+    with wandb.init(entity="nlp1-athena", project="Part 2", name=run_name, config=config) as run:
         output = root / "results" / "part2" / f"{name}-{run.id}"
         output.mkdir(parents=True, exist_ok=True)
         all_predictions = np.empty_like(labels)
@@ -166,6 +178,7 @@ def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *
             scores, predictions = train_fold(texts, labels, fold, encoder=encoder, embeddings=vectors,
                                              tokenizer=tokenizer, device=device, epochs=config["epochs"],
                                              freeze_embeddings=config["freeze_embeddings"],
+                                             settings=run.config,
                                              history_path=output / f"epochs-fold-{number}.csv")
             np.savez_compressed(output / f"fold-{number}.npz", **predictions)
             all_predictions[fold.evaluation] = predictions["prediction"]

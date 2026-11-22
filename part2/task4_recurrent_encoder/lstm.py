@@ -9,14 +9,18 @@ from torch.nn.utils.rnn import pack_padded_sequence
 class LSTMEncoder(nn.Module):
     """Represent a review by the hidden state after its last token."""
 
-    def __init__(self, hidden_size, embedding_matrix, padding_idx=0, freeze_embeddings=True, word_dropout=0.0):
+    def __init__(self, hidden_size, embedding_matrix, padding_idx=0, freeze_embeddings=True,
+                 word_dropout=0.0, num_layers=1, lstm_dropout=0.0):
         super().__init__()
+        if num_layers == 1 and lstm_dropout != 0.0:
+            raise ValueError("LSTM dropout acts between layers and requires num_layers >= 2.")
         self.hidden_size = hidden_size
         self.word_dropout = word_dropout
         self.embedding = nn.Embedding.from_pretrained(
             embedding_matrix, freeze=freeze_embeddings, padding_idx=padding_idx
         )
-        self.lstm = nn.LSTM(self.embedding.embedding_dim, hidden_size, batch_first=True)
+        self.lstm = nn.LSTM(self.embedding.embedding_dim, hidden_size, num_layers=num_layers,
+                            dropout=lstm_dropout, batch_first=True)
 
     @property
     def enc_dim(self):

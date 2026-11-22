@@ -1,0 +1,29 @@
+program: part2/project.py
+name: imdb_lstm_sweep
+method: grid
+metric:
+  name: accuracy
+  goal: maximize
+
+command:
+  - ${env}
+  - ${interpreter}
+  - -m
+  - part2.project
+  - train
+  - --encoder=lstm
+  - --embedding=fasttext
+  - --weights=frozen
+  - --device=cuda
+
+parameters:
+  classifier_dropout:
+    values: [0.1, 0.5]
+  num_layers:
+    values: [1, 2]
+  hidden_size:
+    values: [32, 64]
+  learning_rate:
+    values: [0.001, 0.0003]
+  batch_size:
+    values: [64, 128]
