@@ -71,11 +71,15 @@ def check_baselines(labels, folds, split_seed):
 
 
 def train_fold(texts, labels, fold, *, encoder, embeddings, tokenizer,
-               freeze_embeddings=True, epochs=20, device="cpu", history_path=None, settings=None):
-    """Fit one tutorial encoder and return outer-fold scores and review predictions."""
+               freeze_embeddings=True, epochs=20, device="cpu", history_path=None, settings=None,
+               seed=0):
+    """Fit one tutorial encoder and return outer-fold scores and review predictions.
+
+    The seed sets initial weights, batch order and dropout. Folds stay fixed.
+    """
     if encoder not in ("embed-and-pool", "lstm") or epochs < 1:
         raise ValueError("Choose embed-and-pool or lstm and at least one epoch.")
-    torch.manual_seed(0)
+    torch.manual_seed(seed)
     if settings is None:
         settings = {**TRAINING_DEFAULTS, **LSTM_DEFAULTS}
     enc_kwargs = {"freeze_embeddings": freeze_embeddings}
@@ -131,6 +135,8 @@ def main():
     train.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     train.add_argument("--weights", choices=("frozen", "fine-tuned", "random-trainable"), default="frozen")
     train.add_argument("--half-data", action="store_true", help="Fit on a stratified half of each fitting set.")
+    train.add_argument("--seed", type=int, default=0,
+                       help="Training seed for weights, batch order and dropout. Folds stay fixed (default: 0).")
     args = parser.parse_args()
     if args.command == "train" and args.device == "cuda" and not torch.cuda.is_available():
         parser.error("CUDA is unavailable. Check the GPU allocation and the PyTorch installation.")
@@ -147,10 +153,11 @@ def main():
     print(f"Verified {len(texts):,} IMDb reviews against {checked} Part 1 baselines (seed {split_seed}).")
     if args.command == "train":
         run_training(texts, labels, folds, split_seed, args.encoder, args.embedding, args.device,
-                     weights=args.weights, half_data=args.half_data)
+                     weights=args.weights, half_data=args.half_data, seed=args.seed)
 
 
-def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *, weights="frozen", half_data=False):
+def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *, weights="frozen",
+                 half_data=False, seed=0):
     import wandb
 
     root = Path(__file__).resolve().parents[1]
@@ -158,7 +165,7 @@ def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *
     if weights == "random-trainable":
         vectors.vectors = random_embedding_table(vectors.vectors.shape, vectors.vocab.index(vectors.pad_token))
     tokenizer = ImdbTokenizer(vectors, embedding)
-    config = dict(encoder=encoder, embedding=embedding, split_seed=split_seed, folds=len(folds),
+    config = dict(encoder=encoder, embedding=embedding, split_seed=split_seed, seed=seed, folds=len(folds),
                   weights=weights, freeze_embeddings=(weights == "frozen"), fit_fraction=0.5 if half_data else 1.0,
                   epochs=20, device=device, dataset="stanfordnlp/imdb", **TRAINING_DEFAULTS)
     if encoder == "lstm":
@@ -168,6 +175,9 @@ def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *
         name += f"-{weights}"
     if half_data:
         name += "-half-data"
+    if seed != 0:
+        # Seed 0 keeps the names of the published runs.
+        name += f"-seed-{seed}"
     run_name = None if os.environ.get("WANDB_SWEEP_ID") else name
     with wandb.init(entity="nlp1-athena", project="Part 2", name=run_name, config=config) as run:
         output = root / "results" / "part2" / f"{name}-{run.id}"
@@ -178,7 +188,7 @@ def run_training(texts, labels, folds, split_seed, encoder, embedding, device, *
             scores, predictions = train_fold(texts, labels, fold, encoder=encoder, embeddings=vectors,
                                              tokenizer=tokenizer, device=device, epochs=config["epochs"],
                                              freeze_embeddings=config["freeze_embeddings"],
-                                             settings=run.config,
+                                             settings=run.config, seed=seed,
                                              history_path=output / f"epochs-fold-{number}.csv")
             np.savez_compressed(output / f"fold-{number}.npz", **predictions)
             all_predictions[fold.evaluation] = predictions["prediction"]
