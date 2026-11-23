@@ -28,6 +28,38 @@ We reused the Part 1 five-fold split (seed 3) on all 25,000 labelled IMDb traini
 
 **No.** On the same folds, the Part 1 MLP with two 256-unit layers and Naive Bayes-weighted TF-IDF unigrams and bigrams led our best pooling model by **2.52 percentage points**. Its bigrams can give an adjacent pair such as *not good* its own feature. Mean pooling has no feature dedicated to that pair. This is one plausible explanation for the gap. The two systems also differ in tokenisation, feature weighting and classifier size. [Part 1 results](../../results/final_predictions/index.csv)
 
+## Questions the TA will probably ask
+
+**Which experiment tells you whether fine-tuning helped?**
+
+Start both models with the same pretrained fastText vectors. Freeze the vectors in one model and let IMDb training update them in the other. Accuracy rose from **86.74% to 89.72%**, with a gain on every fold. Even in the frozen model, the classifier learned from the review labels.
+
+**Which experiment tells you whether pretraining itself helped?**
+
+Let both models update their vectors and change only the starting values. Fine-tuned fastText scored **89.72%**, and trainable random vectors scored **89.63%**. That amounts to **23 additional correct reviews out of 25,000**. On the full training data, either starting point worked well.
+
+**Why keep the embedding dimension at 300? Could a larger vector have helped?**
+
+All three released models supplied 300 numbers per word. Keeping that width and the classifier fixed let us compare the embedding sources under the same conditions. A larger dimension would require a separate experiment. Our results tell us that fastText gave the best frozen pooling accuracy among the three sources we tried.
+
+**Why could the Part 1 model still beat pooling?**
+
+Part 1 could learn a weight for an adjacent pair such as *not good*. Pooling gives identical vectors to “the film was good, not bad” and “the film was bad, not good”. Every word occurs equally often, although the opinions differ. Phrase features are one plausible reason Part 1 reached **92.25%** against **89.72%** for pooling. The classifiers and tokenizers also differed.
+
+## Questions from the Part 2 tutorial
+
+**How does embed-and-pool turn a review of any length into one vector? Why exclude padding?**
+
+Look up one vector per token, add the vectors coordinate by coordinate, then divide by the number of real tokens. The average of three 300-dimensional vectors still has 300 coordinates. If a three-token review is padded to ten positions and we divide by ten, its vector shrinks just because a longer review joined the batch. [Tutorial](../tutorial.ipynb)
+
+**How can random word vectors learn when only the whole review has a label?**
+
+Suppose the model predicts positive for a negative review containing *boring*. Backpropagation carries the review’s prediction error through the classifier and the average to the vectors of the words in that review. Across many reviews, words such as *boring* can become useful sentiment cues. A word seen only once has little evidence of its own.
+
+**When would you expect pretraining to help more, and how would you test it?**
+
+When labelled reviews are scarce, a rare word may already have a useful pretrained vector. I would train the pretrained and random pooling models on identical subsets of each training fold, then compare their accuracy gaps on the same held-out reviews. A growing gap as the fitting set shrinks would support that hypothesis.
+
 ## Reproducing Task 3 on Snellius
 
 This folder contains the pooling encoder, the random-initialisation control and the A100 job that runs all five configurations. The shared runner handles folds, checkpoint selection, predictions and W&B logging. [Task 3 code](embed_and_pool.py) · [Slurm job](snellius.sbatch) · [Shared runner](../project.py)

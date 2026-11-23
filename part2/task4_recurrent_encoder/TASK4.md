@@ -69,6 +69,42 @@ The clearest example came from the original **fine-tuned fastText** LSTM. On the
 
 The original 20-unit LSTM also beat pooling when both used the same frozen vectors, by 4.97 points with GloVe, 4.07 with word2vec and 2.68 with fastText. When both fine-tuned fastText, pooling led by 4.91 points. The encoder changes both how word order is handled and how a review is compressed, so these comparisons alone cannot attribute the gains to word order. The Part 1 classifier with weighted TF-IDF bigrams remains ahead at **92.25%**. [Part 1 predictions](../../results/final_predictions/index.csv)
 
+## Questions the TA will probably ask
+
+**Why did you choose 32 hidden units when 64 often did better?**
+
+In the first grid, 64 units won 13 of 16 comparisons that changed only width. In the follow-up, two settings tied at **22,597 correct reviews**. One used 32 units with 10% dropout between layers. The other used 64 units with 50% dropout between layers. We chose the smaller model because it reached the same score with fewer parameters.
+
+**Where did you apply dropout in the winning model?**
+
+During training, classifier dropout hides some activations in the network that predicts sentiment. LSTM dropout hides some outputs of the first recurrent layer before the second layer receives them. The selected model used **10% in each location**. A one-layer LSTM has no connection between recurrent layers where this second kind of dropout could act.
+
+**How can validation loss rise while validation accuracy stays near 85%?**
+
+Imagine a positive review whose predicted probability of being positive falls from 40% to 1%. Both predictions give the wrong label, but the second receives a much larger loss. On fold five of the fine-tuned fastText LSTM, validation loss rose from **0.3774 to 0.9585** between epochs 4 and 20 while training accuracy reached **99.83%**. We kept the epoch-4 weights because they had the lowest validation loss on that fold.
+
+**Did more training data help? Does that comparison tell us how much pretraining helped?**
+
+With the same frozen fastText LSTM and evaluation reviews, increasing the fitting set from 9,000 to 18,000 reviews per fold raised accuracy from **86.87% to 89.41%**. To find out whether pretraining matters more with fewer labels, we would also need matched LSTM runs with trainable random and trainable pretrained vectors at both sizes.
+
+**What evidence supports the improvement over pooling? Did handling negation explain it?**
+
+The selected LSTM got **166 more reviews right** than the best pooling model, with gains on all five folds. Its **90.39%** is a cross-validation score from the folds used to choose it. The separate error analysis found no clear extra advantage for the baseline LSTM on reviews with more negation words. Word order is a capability of the architecture. The cause of the overall gain is still open. [Error analysis](../task6_error_analysis/TASK6.md)
+
+## Questions from the Part 2 tutorial
+
+**Why can a recurrent encoder distinguish “dog bites man” from “man bites dog”?**
+
+It updates a hidden state after each token. When it reads *bites*, the previous state already depends on whether it read *dog* or *man* first. Mean pooling gives the same vector in both orders. The tutorial demonstrates this difference before training a classifier. [Tutorial](../tutorial.ipynb)
+
+**What do the LSTM’s cell state and hidden state do? Which one classified our reviews?**
+
+The cell state carries memory across tokens. Learned gates control how much of that memory to keep, update and expose through the hidden state. We passed the top layer’s final **hidden state** to the sentiment classifier. We supplied the true sequence lengths so the final state corresponded to the last word of each review.
+
+**What would a bidirectional LSTM change?**
+
+It would read the review twice, once in each direction. Concatenating the two final hidden states gives a document vector of width twice the hidden size per direction. Our IMDb runs used a forward LSTM. Whether reading backwards as well improves accuracy would need its own comparison.
+
 ## Reproducing the runs on Snellius
 
 Run from the repository root with the project environment in `.venv`, the IMDb dataset cached, the vectors in `embeddings/` and W&B configured for `nlp1-athena/Part 2`.
